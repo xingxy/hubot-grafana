@@ -31,6 +31,7 @@ Then add **hubot-grafana** to your `external-scripts.json`:
 | `HUBOT_GRAFANA_HOST`             | **Yes**  | Host for your Grafana 2.x install, e.g. `http://play.grafana.org` |
 | `HUBOT_GRAFANA_API_KEY`          | _Yes^_   | Grafana API key (This can be "Viewer" role.) |
 | `HUBOT_GRAFANA_QUERY_TIME_RANGE` | No       | Default time range for queries (defaults to 6h) |
+| `HUBOT_ROCKETCHAT_WEBHOOK_URL`   | **Yes**  | Rocket-Chat Incoming WebHook Integration URL |
 
 ^ _Not required for `auth.anonymous` Grafana configurations. All other authentication models will require a user-specific API key._
 
