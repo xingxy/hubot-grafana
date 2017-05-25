@@ -14,12 +14,7 @@
 #   HUBOT_GRAFANA_HOST - Host for your Grafana 2.0 install, e.g. 'http://play.grafana.org'
 #   HUBOT_GRAFANA_API_KEY - API key for a particular user (leave unset if unauthenticated)
 #   HUBOT_GRAFANA_QUERY_TIME_RANGE - Optional; Default time range for queries (defaults to 6h)
-#   HUBOT_GRAFANA_S3_ENDPOINT - Optional; Endpoint of the S3 API (useful for S3 compatible API, defaults to s3.amazonaws.com)
-#   HUBOT_GRAFANA_S3_BUCKET - Optional; Name of the S3 bucket to copy the graph into
-#   HUBOT_GRAFANA_S3_ACCESS_KEY_ID - Optional; Access key ID for S3
-#   HUBOT_GRAFANA_S3_SECRET_ACCESS_KEY - Optional; Secret access key for S3
-#   HUBOT_GRAFANA_S3_PREFIX - Optional; Bucket prefix (useful for shared buckets)
-#   HUBOT_GRAFANA_S3_REGION - Optional; Bucket region (defaults to us-standard)
+#   HUBOT_ROCKETCHAT_WEBHOOK_URL - Rocket-chat Incoming WebHook Integration URL
 #
 # Dependencies:
 #   "knox": "^0.9.2"
@@ -53,6 +48,7 @@ module.exports = (robot) ->
   s3_style = process.env.HUBOT_GRAFANA_S3_STYLE if process.env.HUBOT_GRAFANA_S3_STYLE
   s3_region = process.env.HUBOT_GRAFANA_S3_REGION or 'us-standard'
   s3_port = process.env.HUBOT_GRAFANA_S3_PORT if process.env.HUBOT_GRAFANA_S3_PORT
+  rocket_webhook_url = process.env.HUBOT_ROCKETCHAT_WEBHOOK_URL
 
   # Get a specific dashboard with options
   robot.respond /(?:grafana|graph|graf) (?:dash|dashboard|db) ([A-Za-z0-9\-\:_]+)(.*)?/i, (msg) ->
@@ -250,6 +246,25 @@ module.exports = (robot) ->
       # Hipchat
       when 'hipchat'
         msg.send "#{title}: #{link} - #{image}"
+      # Rocket.Chat
+      when 'rocketchat'
+        rspBody = JSON.stringify({
+          "text": "",
+          "attachments": [{
+            "title": title,
+            "title_link": "",
+            "text": "",
+            "image_url": image,
+            "color": "#764FA5"
+          }]
+        })
+        robot.http(rocket_webhook_url).post(rspBody) (err, rsp, body) ->
+          if err
+            msg.send "Encountered an error :( #{err}"
+            return
+          if rsp.statusCode isnt 200
+            msg.send "Request didn't come back HTTP 200 :(, now is #{rsp.statusCode}"
+            return
       # Everything else
       else
         msg.send "#{title}: #{image} - #{link}"
